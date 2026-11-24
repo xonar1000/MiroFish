@@ -50,7 +50,7 @@ class LocalDocumentIngestorTests(unittest.TestCase):
             self.ingestor.split_text("abc", 3, 3)
 
     def test_graph_deletion_cascades_source_chunks(self):
-        result = self.ingestor.ingest_text("source text", {}, chunk_size=20)
+        result = self.ingestor.ingest_text("source text", {}, chunk_size=20, chunk_overlap=0)
         graph_id = result["graph_id"]
         self.assertTrue(self.adapter.delete_graph(graph_id))
         self.assertEqual(self.store.list_document_chunks(graph_id), [])
