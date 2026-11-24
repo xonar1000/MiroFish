@@ -25,16 +25,25 @@ class SQLiteMemoryStore:
 
     def __init__(self, database_path: str | os.PathLike[str] | None = None):
         configured = database_path or os.environ.get("MIROFISH_MEMORY_DB")
-        self.database_path = Path(
-            configured or Path(__file__).resolve().parents[2] / "uploads" / "mirofish_memory.sqlite3"
+        raw_path = str(configured or Path(__file__).resolve().parents[2] / "uploads" / "mirofish_memory.sqlite3")
+        self._is_memory = raw_path == ":memory:"
+        self.database_path = Path(raw_path) if not self._is_memory else None
+        self._database_target = (
+            f"file:mirofish-memory-{id(self)}?mode=memory&cache=shared"
+            if self._is_memory else str(self.database_path)
         )
-        if str(self.database_path) != ":memory:":
+        self._anchor = None
+        if self._is_memory:
+            self._anchor = sqlite3.connect(self._database_target, uri=True, timeout=30)
+        else:
             self.database_path.parent.mkdir(parents=True, exist_ok=True)
         self._initialize()
 
     @contextmanager
     def _connect(self) -> Iterator[sqlite3.Connection]:
-        connection = sqlite3.connect(str(self.database_path), timeout=30)
+        connection = sqlite3.connect(
+            self._database_target, uri=self._is_memory, timeout=30
+        )
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA foreign_keys = ON")
         try:
