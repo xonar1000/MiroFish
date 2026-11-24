@@ -14,6 +14,11 @@ class SQLiteMemoryStoreTests(unittest.TestCase):
     def tearDown(self):
         self.temp_dir.cleanup()
 
+    def test_shared_in_memory_database(self):
+        store = SQLiteMemoryStore(":memory:")
+        graph_id = store.create_graph("In-memory graph")
+        self.assertEqual(store.get_graph(graph_id)["name"], "In-memory graph")
+
     def test_graph_round_trip_and_delete(self):
         graph = self.store.get_graph(self.graph_id)
         self.assertEqual(graph["name"], "Research graph")
