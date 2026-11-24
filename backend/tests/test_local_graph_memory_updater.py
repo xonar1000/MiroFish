@@ -35,7 +35,7 @@ class LocalUpdaterTests(unittest.TestCase):
             "timestamp": "2026-11-24T12:00:00Z",
         }, "twitter")
         self.updater.add_activity_from_dict({"event_type": "round"}, "twitter")
-        rows = self.store.list_activities("sim1")
+        rows = self.store.list_activities(self.updater.simulation_id)
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0]["graph_id"], self.graph_id)
         self.assertEqual(rows[0]["round_num"], 3)
