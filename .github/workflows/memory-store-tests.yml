@@ -30,3 +30,5 @@ jobs:
         run: python -m unittest discover -s backend/tests -p "test_local_entity_reader.py" -v
       - name: Run isolated SQLite simulation-updater tests
         run: python -m unittest discover -s backend/tests -p "test_local_graph_memory_updater.py" -v
+      - name: Run isolated SQLite document-ingestion tests
+        run: python -m unittest discover -s backend/tests -p "test_local_document_ingestor.py" -v
