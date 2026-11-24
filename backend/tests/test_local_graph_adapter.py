@@ -1,9 +1,11 @@
 """Contract tests for the isolated SQLite graph adapter."""
 import importlib.util
+import sys
 from pathlib import Path
 import unittest
 
 SERVICE_DIR = Path(__file__).resolve().parents[1] / "app" / "services"
+sys.path.insert(0, str(SERVICE_DIR))
 
 
 def load_module(name, filename):
