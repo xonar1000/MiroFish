@@ -18,7 +18,7 @@ def load_module(name, filename):
 memory_store = load_module("mirofish_test_memory_store", "memory_store.py")
 adapter_module = load_module("mirofish_test_local_graph_adapter", "local_graph_adapter.py")
 LocalGraphAdapter = adapter_module.LocalGraphAdapter
-MemoryStoreError = memory_store.MemoryStoreError
+MemoryStoreError = adapter_module.MemoryStoreError
 SQLiteMemoryStore = memory_store.SQLiteMemoryStore
 
 
