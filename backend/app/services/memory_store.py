@@ -269,4 +269,4 @@ class SQLiteMemoryStore:
                 ORDER BY activity_id LIMIT ?""",
                 (simulation_id, limit),
             ).fetchall()
-        return [self._decode(row, ("activity_json",))]
+        return [self._decode(row, ("activity_json",)) for row in rows]
