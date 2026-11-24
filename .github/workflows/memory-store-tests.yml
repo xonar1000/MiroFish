@@ -1,0 +1,26 @@
+name: Memory store contract tests
+
+on:
+  push:
+    branches:
+      - adaptacion-gratuita-sin-zep
+  pull_request:
+    branches:
+      - adaptacion-gratuita-sin-zep
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  memory-store-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run isolated SQLite memory-store tests
+        run: python -m unittest discover -s backend/tests -p "test_memory_store.py" -v
