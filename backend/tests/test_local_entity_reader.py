@@ -2,6 +2,7 @@
 import importlib.util
 from pathlib import Path
 import sys
+import uuid
 import unittest
 
 SERVICE_DIR = Path(__file__).resolve().parents[1] / "app" / "services"
@@ -26,7 +27,7 @@ class LocalEntityReaderTests(unittest.TestCase):
     def setUp(self):
         store = memory.SQLiteMemoryStore(":memory:")
         self.adapter = adapter_mod.LocalGraphAdapter(store)
-        self.graph = self.adapter.create_graph("test", graph_id="g1")
+        self.graph = self.adapter.create_graph("test", graph_id=f"g-{uuid.uuid4()}")
         self.adapter.upsert_nodes(self.graph, [
             {"uuid": "p", "name": "Ana", "labels": ["Entity", "Person"]},
             {"uuid": "c", "name": "Acme", "labels": ["Entity", "Company"]},
