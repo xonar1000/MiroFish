@@ -9,7 +9,10 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
-try:\n    from .memory_store import SQLiteMemoryStore, MemoryStoreError\nexcept ImportError:  # direct-file loading in isolated unit tests\n    from memory_store import SQLiteMemoryStore, MemoryStoreError
+try:
+    from .memory_store import SQLiteMemoryStore, MemoryStoreError
+except ImportError:  # direct-file loading in isolated unit tests
+    from memory_store import SQLiteMemoryStore, MemoryStoreError
 
 
 class LocalGraphAdapter:
