@@ -138,6 +138,17 @@ class SQLiteMemoryStore:
             row = db.execute("SELECT * FROM graphs WHERE graph_id = ?", (graph_id,)).fetchone()
         return self._decode(row, ("metadata_json",)) if row else None
 
+    def update_graph_metadata(self, graph_id: str, metadata: dict[str, Any]) -> None:
+        if not isinstance(metadata, dict):
+            raise ValueError("metadata must be an object")
+        with self._connect() as db:
+            cursor = db.execute(
+                "UPDATE graphs SET metadata_json = ? WHERE graph_id = ?",
+                (self._json(metadata), graph_id),
+            )
+            if cursor.rowcount != 1:
+                raise MemoryStoreError(f"Graph not found: {graph_id}")
+
     def delete_graph(self, graph_id: str) -> bool:
         with self._connect() as db:
             cursor = db.execute("DELETE FROM graphs WHERE graph_id = ?", (graph_id,))
@@ -212,7 +223,6 @@ class SQLiteMemoryStore:
             )
         return int(cursor.lastrowid)
 
-
     def save_document_chunks(self, graph_id: str,
                              chunks: list[dict[str, Any]]) -> int:
         """Persist source chunks without pretending to extract graph entities."""
@@ -259,4 +269,4 @@ class SQLiteMemoryStore:
                 ORDER BY activity_id LIMIT ?""",
                 (simulation_id, limit),
             ).fetchall()
-        return [self._decode(row, ("activity_json",)) for row in rows]
+        return [self._decode(row, ("activity_json",))]
