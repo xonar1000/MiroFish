@@ -18,6 +18,7 @@ def load(name, filename):
 
 
 memory = load("ingest_memory_store", "memory_store.py")
+sys.modules["memory_store"] = memory
 adapter_mod = load("ingest_local_adapter", "local_graph_adapter.py")
 sys.modules["local_graph_adapter"] = adapter_mod
 ingestor_mod = load("ingest_local_document", "local_document_ingestor.py")
