@@ -32,3 +32,5 @@ jobs:
         run: python -m unittest discover -s backend/tests -p "test_local_graph_memory_updater.py" -v
       - name: Run isolated SQLite document-ingestion tests
         run: python -m unittest discover -s backend/tests -p "test_local_document_ingestor.py" -v
+      - name: Run isolated SQLite semantic-extraction tests
+        run: python -m unittest discover -s backend/tests -p "test_local_semantic_extractor.py" -v
