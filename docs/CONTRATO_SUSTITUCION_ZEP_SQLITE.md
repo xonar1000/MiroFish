@@ -91,3 +91,27 @@ El updater SQLite registra acciones estructuradas; no realiza extracción semán
 GitHub Actions run `45389523275` terminó en `success` en commit `eecbf3c2ac8361bca8cbac9cecea565b7f352b6d`. Ejecutó cuatro suites: almacén (6), adaptador (4), lector (4) y updater (3): **17 pruebas aprobadas**.
 
 Estos módulos siguen aislados: no están conectados todavía a las rutas Flask ni a `SimulationRunner`. La construcción del grafo desde documentos y la ejecución completa OASIS siguen dependiendo del flujo original con Zep hasta que se implemente y valide su reemplazo.
+
+
+## Ingreso de documentos y extracción semántica local (2026-11-24)
+
+Se añadieron dos etapas separadas para no confundir almacenamiento de texto con construcción de conocimiento:
+
+- `local_document_ingestor.py` divide y guarda los fragmentos de origen en SQLite, junto con metadatos de ontología. Su estado explícito es `source_chunks_stored`; no afirma haber creado entidades.
+- `local_semantic_extractor.py` es una etapa optativa que usa `LLMClient` (endpoint OpenAI-compatible configurado por el operador) para extraer entidades y relaciones limitadas a los tipos de la ontología. Persiste nodos/aristas en el adaptador local y marca metadatos de extracción completada.
+- `memory_store.py` incorpora actualización de metadatos de grafo para registrar el resultado de extracción.
+
+### Validación
+
+GitHub Actions run `45392270119`, commit `4d6b265397eeb497386afd0464665775aa5de434`, terminó en `success`. Ejecutó seis suites aisladas: almacén (6), adaptador (4), lector (4), updater (3), ingreso de documentos (3) y extractor semántico (2): **22 pruebas aprobadas**.
+
+La suite del extractor usa un LLM simulado. Por tanto valida el contrato, la normalización y la persistencia local, pero **no** valida llamadas a un proveedor real, calidad semántica, costes/cuotas ni extracción sobre documentos reales.
+
+### Pendiente antes de conectar a la aplicación
+
+1. Probar el extractor con un endpoint LLM real y un documento controlado; la aplicación aún no tiene credenciales de proveedor configuradas.
+2. Conectar el servicio de extracción al flujo de construcción de grafo de Flask, manteniendo selección explícita de backend.
+3. Reemplazar el lector y el updater Zep en las rutas/runner mediante adaptadores compatibles.
+4. Ejecutar pruebas de integración Flask y después una simulación OASIS completa.
+
+No se ha quitado Zep, no se ha cambiado el backend predeterminado y no se ha desplegado MiroFish. En Render Free, SQLite local continúa sujeto a almacenamiento efímero.
