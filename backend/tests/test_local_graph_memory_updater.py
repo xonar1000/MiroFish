@@ -39,7 +39,7 @@ class LocalUpdaterTests(unittest.TestCase):
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0]["graph_id"], self.graph_id)
         self.assertEqual(rows[0]["round_num"], 3)
-        self.assertEqual(rows[0]["activity_json"]["action_type"], "CREATE_POST")
+        self.assertEqual(rows[0]["activity"]["action_type"], "CREATE_POST")
         self.assertEqual(self.updater.get_stats()["total_activities"], 1)
         self.assertEqual(self.updater.get_stats()["skipped_count"], 1)
 
