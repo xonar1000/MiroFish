@@ -1,8 +1,14 @@
+import importlib.util
 import tempfile
 import unittest
 from pathlib import Path
 
-from backend.app.services.memory_store import MemoryStoreError, SQLiteMemoryStore
+MODULE_PATH = Path(__file__).resolve().parents[1] / "app" / "services" / "memory_store.py"
+SPEC = importlib.util.spec_from_file_location("mirofish_memory_store", MODULE_PATH)
+MEMORY_STORE = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(MEMORY_STORE)
+MemoryStoreError = MEMORY_STORE.MemoryStoreError
+SQLiteMemoryStore = MEMORY_STORE.SQLiteMemoryStore
 
 
 class SQLiteMemoryStoreTests(unittest.TestCase):
