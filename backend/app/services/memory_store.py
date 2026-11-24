@@ -96,6 +96,19 @@ class SQLiteMemoryStore:
                 );
                 CREATE INDEX IF NOT EXISTS idx_activities_simulation
                     ON activities(simulation_id, activity_id);
+                CREATE TABLE IF NOT EXISTS document_chunks (
+                    graph_id TEXT NOT NULL,
+                    chunk_id TEXT NOT NULL,
+                    document_index INTEGER NOT NULL,
+                    chunk_index INTEGER NOT NULL,
+                    content TEXT NOT NULL,
+                    content_sha256 TEXT NOT NULL,
+                    metadata_json TEXT NOT NULL DEFAULT '{}',
+                    PRIMARY KEY (graph_id, chunk_id),
+                    FOREIGN KEY (graph_id) REFERENCES graphs(graph_id) ON DELETE CASCADE
+                );
+                CREATE INDEX IF NOT EXISTS idx_document_chunks_order
+                    ON document_chunks(graph_id, document_index, chunk_index);
                 """
             )
 
@@ -198,6 +211,44 @@ class SQLiteMemoryStore:
                 (simulation_id, graph_id, round_num, occurred_at, self._json(activity)),
             )
         return int(cursor.lastrowid)
+
+
+    def save_document_chunks(self, graph_id: str,
+                             chunks: list[dict[str, Any]]) -> int:
+        """Persist source chunks without pretending to extract graph entities."""
+        import hashlib
+        with self._connect() as db:
+            if not db.execute("SELECT 1 FROM graphs WHERE graph_id = ?", (graph_id,)).fetchone():
+                raise MemoryStoreError(f"Graph not found: {graph_id}")
+            for chunk in chunks:
+                content = str(chunk.get("content", ""))
+                if not content.strip():
+                    raise ValueError("Document chunk content cannot be empty")
+                chunk_id = str(chunk.get("chunk_id") or uuid.uuid4())
+                digest = hashlib.sha256(content.encode("utf-8")).hexdigest()
+                db.execute(
+                    """INSERT INTO document_chunks
+                    (graph_id, chunk_id, document_index, chunk_index, content,
+                     content_sha256, metadata_json)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(graph_id, chunk_id) DO UPDATE SET
+                    document_index=excluded.document_index,
+                    chunk_index=excluded.chunk_index, content=excluded.content,
+                    content_sha256=excluded.content_sha256,
+                    metadata_json=excluded.metadata_json""",
+                    (graph_id, chunk_id, int(chunk.get("document_index", 1)),
+                     int(chunk.get("chunk_index", 1)), content, digest,
+                     self._json(chunk.get("metadata", {}))),
+                )
+        return len(chunks)
+
+    def list_document_chunks(self, graph_id: str) -> list[dict[str, Any]]:
+        with self._connect() as db:
+            rows = db.execute(
+                """SELECT * FROM document_chunks WHERE graph_id = ?
+                ORDER BY document_index, chunk_index""", (graph_id,)
+            ).fetchall()
+        return [self._decode(row, ("metadata_json",)) for row in rows]
 
     def list_activities(self, simulation_id: str, limit: int = 500) -> list[dict[str, Any]]:
         if limit < 1:
