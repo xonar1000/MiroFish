@@ -31,7 +31,17 @@ class LocalDocumentIngestor:
         if not normalized:
             return []
         step = chunk_size - chunk_overlap
-        return [normalized[i:i + chunk_size] for i in range(0, len(normalized), step)]
+        chunks = []
+        start = 0
+        while start < len(normalized):
+            chunk = normalized[start:start + chunk_size]
+            if not chunk:
+                break
+            chunks.append(chunk)
+            if start + chunk_size >= len(normalized):
+                break
+            start += step
+        return chunks
 
     def ingest_text(self, text: str, ontology: dict[str, Any],
                     graph_name: str = "MiroFish Local Graph",
