@@ -3,6 +3,7 @@ import importlib.util
 import sys
 from pathlib import Path
 import unittest
+import uuid
 
 SERVICE_DIR = Path(__file__).resolve().parents[1] / "app" / "services"
 sys.path.insert(0, str(SERVICE_DIR))
@@ -25,7 +26,7 @@ SQLiteMemoryStore = memory_store.SQLiteMemoryStore
 class LocalGraphAdapterTests(unittest.TestCase):
     def setUp(self):
         self.adapter = LocalGraphAdapter(SQLiteMemoryStore(":memory:"))
-        self.graph_id = self.adapter.create_graph("Contract graph", graph_id="g-test")
+        self.graph_id = self.adapter.create_graph("Contract graph", graph_id=f"g-{uuid.uuid4()}")
 
     def test_graph_lifecycle_and_info(self):
         self.assertEqual(self.adapter.get_graph(self.graph_id)["name"], "Contract graph")
