@@ -72,3 +72,22 @@ Antes de conectar SQLite, el adaptador local debe ofrecer equivalentes funcional
 - La base SQLite actual usa por defecto `backend/uploads/mirofish_memory.sqlite3`. En Render Free el disco del servicio es efímero: no se debe prometer persistencia de datos entre reinicios/redeploys.
 - El CI exitoso no prueba despliegue, proveedor LLM, frontend, ejecución OASIS ni equivalencia semántica con Zep.
 - La integración sigue pendiente. No se ha eliminado ni desactivado Zep.
+
+
+## Implementación local incremental (2026-11-24)
+
+Se añadieron componentes aislados sobre el almacén SQLite:
+
+- `backend/app/services/local_graph_adapter.py`: ciclo de vida, escritura/lectura de nodos y relaciones, y vistas de datos del grafo.
+- `backend/app/services/local_entity_reader.py`: filtro de entidades por etiquetas y enriquecimiento con relaciones entrantes/salientes, con estructuras `EntityNode` y `FilteredEntities`.
+- `backend/app/services/local_graph_memory_updater.py`: registra las acciones originales de los agentes en la tabla de actividades y ofrece un gestor con métodos de ciclo de vida compatibles con los puntos de coordinación del runner.
+
+### Límite funcional del updater
+
+El updater SQLite registra acciones estructuradas; no realiza extracción semántica de texto ni convierte automáticamente publicaciones, nombres o acciones en entidades y relaciones del grafo. Esa equivalencia con la ingestión episódica de Zep sigue pendiente y requiere diseño/pruebas independientes.
+
+### Validación actual
+
+GitHub Actions run `45389523275` terminó en `success` en commit `eecbf3c2ac8361bca8cbac9cecea565b7f352b6d`. Ejecutó cuatro suites: almacén (6), adaptador (4), lector (4) y updater (3): **17 pruebas aprobadas**.
+
+Estos módulos siguen aislados: no están conectados todavía a las rutas Flask ni a `SimulationRunner`. La construcción del grafo desde documentos y la ejecución completa OASIS siguen dependiendo del flujo original con Zep hasta que se implemente y valide su reemplazo.
