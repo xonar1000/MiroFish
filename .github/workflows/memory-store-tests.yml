@@ -24,3 +24,5 @@ jobs:
           python-version: "3.11"
       - name: Run isolated SQLite memory-store tests
         run: python -m unittest discover -s backend/tests -p "test_memory_store.py" -v
+      - name: Run isolated SQLite graph-adapter tests
+        run: python -m unittest discover -s backend/tests -p "test_local_graph_adapter.py" -v
